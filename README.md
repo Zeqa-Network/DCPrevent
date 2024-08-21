@@ -5,7 +5,7 @@
 ## Todo
 - ✅ ~~Link left & right debounce~~ 
 - ✅ ~~BetterDCPrevent version in title bar~~
-- Check for updates on startup
+- ✅ ~~Check for updates on startup~~
 
 ## Features
 - Customisable left & right mouse debounce limits
