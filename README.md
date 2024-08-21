@@ -6,6 +6,7 @@
 - Link left & right debounce
 - Lock debounce for when the game has started
 - BetterDCPrevent version in title bar
+- Check for updates on startup
 
 ## Features
 - Customisable left & right mouse debounce limits
