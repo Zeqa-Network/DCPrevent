@@ -5,6 +5,7 @@
 ## Todo
 - Link left & right debounce
 - Lock debounce for when the game has started
+- BetterDCPrevent ersion in title bar
 
 ## Features
 - Customisable left & right mouse debounce limits
