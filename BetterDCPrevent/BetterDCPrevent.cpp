@@ -13,7 +13,7 @@
 
 #pragma comment(lib, "wininet.lib")
 
-const std::wstring CURRENT_VERSION = L"1.0.4"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.0.5"; // CHANGE THIS WHEN UPDATING
 
 HHOOK hMouseHook;
 std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
@@ -22,11 +22,12 @@ int leftDebounceTime = 50;
 int rightDebounceTime = 50;
 
 HWND hLeftTrackbar, hRightTrackbar;
-HWND hLeftDebounceEdit, hRightDebounceEdit, hNotificationField, hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hCheckForUpdatesButton;
+HWND hLeftDebounceEdit, hRightDebounceEdit, hNotificationField, hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton;
 NOTIFYICONDATA nid;
 bool isHiddenToTray = false;
 bool linkDebounces = false;
 bool internalUpdate = false;
+bool lockDebounces = false;
 
 #define WM_UPDATE_LEFT_DEBOUNCE (WM_USER + 1)
 #define WM_UPDATE_RIGHT_DEBOUNCE (WM_USER + 2)
@@ -275,8 +276,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	    hLinkDebouncesCheckbox = CreateWindow(L"BUTTON", L"Link",
 	        WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
-	        320, 80, 60, 20,
+	        310, 80, 60, 20,
 	        hwnd, (HMENU)4, GetModuleHandle(NULL), NULL);
+
+		hLockCheckbox = CreateWindow(L"BUTTON", L"Lock",
+		    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
+		    380, 80, 60, 20,
+		    hwnd, (HMENU)8, GetModuleHandle(NULL), NULL);
+        CheckDlgButton(hwnd, 8, BST_UNCHECKED);
+
 
 	    CreateWindow(L"STATIC", L"Right Click Debounce:", WS_VISIBLE | WS_CHILD,
 	        10, 80, 150, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
@@ -388,6 +396,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	            case 7:
 	                CheckForUpdates(hwnd, false);
 	                break;
+                case 8:
+	                if (SendMessage(hLockCheckbox, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+	                    int result = MessageBox(hwnd,
+	                        L"Are you sure you want to lock the debounce settings? You will need to restart the program to modify them again.",
+	                        L"Lock Settings", MB_YESNO | MB_ICONQUESTION);
+	                    
+	                    if (result == IDYES)
+	                    {
+	                        lockDebounces = true;
+	                        EnableWindow(hLeftTrackbar, FALSE);
+	                        EnableWindow(hRightTrackbar, FALSE);
+	                        EnableWindow(hLeftDebounceEdit, FALSE);
+	                        EnableWindow(hRightDebounceEdit, FALSE);
+	                        EnableWindow(hLeftResetButton, FALSE);
+	                        EnableWindow(hRightResetButton, FALSE);
+	                        EnableWindow(hLinkDebouncesCheckbox, FALSE);
+	                        EnableWindow(hLockCheckbox, FALSE);
+	                    }
+	                    else
+	                    {
+	                        CheckDlgButton(hwnd, 8, BST_UNCHECKED);
+	                    }
+	                }
+					break;
 	        }
 	    } else if (HIWORD(wParam) == EN_CHANGE) {
 	        if ((HWND)lParam == hLeftDebounceEdit) {
