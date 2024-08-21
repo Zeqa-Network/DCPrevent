@@ -5,6 +5,7 @@
 ## Features
 - Customisable left & right mouse debounce limits
 - Linkable left & right mouse debounce limits
+- Lock the left & right debounce until you restart the app
 - Copyable logs
 - Logs click time
 - Logs current debounce on click
