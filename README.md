@@ -2,6 +2,10 @@
 
 ### I didn't like that the mainstream DC Prevent shipped with an extra DLL, also it lacked features.
 
+## Todo
+- Link left & right debounce
+- Lock debounce for when the game has started
+
 ## Features
 - Customisable left & right mouse debounce limits
 - Copyable logs
