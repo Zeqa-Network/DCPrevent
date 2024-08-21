@@ -10,7 +10,7 @@ BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It remo
 - **Persistent Configuration:** Your settings are saved and retained across restarts.
 - **Detailed Logging:**
   - Logs opening times to ensure maximum trust.
-  - Logs click times and current debounce settings.
+  - Logs click times.
   - Easily copy logs for analysis.
 - **Auto Update Checking:** Automatically checks for updates to keep your app up-to-date.
 - **System Tray Support:** Minimize the app to the system tray to keep your taskbar clutter-free.
