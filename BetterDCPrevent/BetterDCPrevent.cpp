@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <locale>
 #include <codecvt>
+#include <fstream>
+#include <filesystem>
+#include <cstdlib>
 #include "Resource.h"
 
 #pragma comment(lib, "wininet.lib")
@@ -29,6 +32,8 @@ bool linkDebounces = false;
 bool internalUpdate = false;
 bool lockDebounces = false;
 
+
+
 #define WM_UPDATE_LEFT_DEBOUNCE (WM_USER + 1)
 #define WM_UPDATE_RIGHT_DEBOUNCE (WM_USER + 2)
 #define WM_COPY_LOGS (WM_USER + 3)
@@ -37,6 +42,111 @@ bool lockDebounces = false;
 #define WM_LINK_DEBOUNCES (WM_USER + 6)
 
 #define TRAY_ICON_ID 1
+
+class Config {
+public:
+    Config() {
+        LoadConfiguration();
+    }
+
+    ~Config() {
+        SaveConfiguration();
+    }
+
+    int GetLeftDebounceTime() const { return leftDebounceTime; }
+    void SetLeftDebounceTime(int time) { leftDebounceTime = time; }
+
+    int GetRightDebounceTime() const { return rightDebounceTime; }
+    void SetRightDebounceTime(int time) { rightDebounceTime = time; }
+
+    bool IsLinkDebounces() const { return linkDebounces; }
+    void SetLinkDebounces(bool link) { linkDebounces = link; }
+
+    bool IsLockDebounces() const { return lockDebounces; }
+    void SetLockDebounces(bool lock) { lockDebounces = lock; }
+
+    bool IsHiddenToTray() const { return isHiddenToTray; }
+    void SetHiddenToTray(bool hidden) { isHiddenToTray = hidden; }
+
+private:
+    int leftDebounceTime = 0;
+    int rightDebounceTime = 0;
+    bool linkDebounces = false;
+    bool lockDebounces = false;
+    bool isHiddenToTray = false;
+
+    void CreateConfigDirectory() {
+        std::filesystem::path configPath = GetConfigPath();
+        if (!std::filesystem::exists(configPath)) {
+            std::filesystem::create_directory(configPath);
+        }
+    }
+
+    void SaveConfiguration() {
+        CreateConfigDirectory();
+        std::filesystem::path configFilePath = GetConfigPath() / L"config.txt";
+        
+        std::wofstream configFile(configFilePath);
+        if (configFile.is_open()) {
+            configFile << leftDebounceTime << L'\n';
+            configFile << rightDebounceTime << L'\n';
+            configFile << (linkDebounces ? 1 : 0) << L'\n';
+            configFile << (lockDebounces ? 1 : 0) << L'\n';
+            configFile << (isHiddenToTray ? 1 : 0) << L'\n';
+            configFile.close();
+        }
+    }
+
+    void LoadConfiguration() {
+        CreateConfigDirectory();
+        std::filesystem::path configFilePath = GetConfigPath() / L"config.txt";
+        
+        std::wifstream configFile(configFilePath);
+        if (configFile.is_open()) {
+            configFile >> leftDebounceTime;
+            configFile >> rightDebounceTime;
+            int linkDebouncesInt;
+            int lockDebouncesInt;
+            int isHiddenToTrayInt;
+            configFile >> linkDebouncesInt;
+            configFile >> lockDebouncesInt;
+            configFile >> isHiddenToTrayInt;
+            
+            linkDebounces = (linkDebouncesInt != 0);
+            lockDebounces = (lockDebouncesInt != 0);
+            isHiddenToTray = (isHiddenToTrayInt != 0);
+            
+            configFile.close();
+        }
+    }
+
+    std::filesystem::path GetConfigPath() const {
+        wchar_t appdataPath[MAX_PATH];
+        if (GetEnvironmentVariableW(L"APPDATA", appdataPath, MAX_PATH)) {
+            return std::filesystem::path(appdataPath) / L"BetterDCPrevent";
+        } else {
+            return L"";
+        }
+    }
+};
+
+Config config;
+
+void UpdateUIFromConfig() {
+    SendMessage(hLeftTrackbar, TBM_SETPOS, TRUE, config.GetLeftDebounceTime());
+    SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, config.GetRightDebounceTime());
+    SetWindowText(hLeftDebounceEdit, std::to_wstring(config.GetLeftDebounceTime()).c_str());
+    SetWindowText(hRightDebounceEdit, std::to_wstring(config.GetRightDebounceTime()).c_str());
+    SendMessage(hLinkDebouncesCheckbox, BM_SETCHECK, config.IsLinkDebounces() ? BST_CHECKED : BST_UNCHECKED, 0);
+    isHiddenToTray = config.IsHiddenToTray();
+}
+
+void SaveConfigChanges() {
+    config.SetLeftDebounceTime(leftDebounceTime);
+    config.SetRightDebounceTime(rightDebounceTime);
+    config.SetLinkDebounces(linkDebounces);
+    config.SetHiddenToTray(isHiddenToTray);
+}
 
 void UpdateNotificationField(const std::wstring& message) {
     int length = GetWindowTextLength(hNotificationField);
@@ -234,6 +344,7 @@ void PostDebounceUpdate(HWND hwnd, UINT msg, int debounceTime) {
     if (!internalUpdate) {
         internalUpdate = true;
         PostMessage(hwnd, msg, (WPARAM)debounceTime, 0);
+        SaveConfigChanges();
     }
 }
 
@@ -241,6 +352,7 @@ void ResetDebounceValue(HWND editControl, int& debounceTime, HWND trackbarContro
     debounceTime = 50;
     SendMessage(trackbarControl, TBM_SETPOS, TRUE, debounceTime);
     SetWindowText(editControl, std::to_wstring(debounceTime).c_str());
+    SaveConfigChanges();
 }
 
 void SafeUpdate(HWND editControl, HWND trackbarControl, int& debounceTime, bool isLinking) {
@@ -347,6 +459,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	        hwnd, NULL, GetModuleHandle(NULL), NULL);
 	    SendMessage(hNotificationField, EM_SETREADONLY, TRUE, 0);
 
+        UpdateUIFromConfig();
 	    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] First Opened");
 	    break;
 
@@ -376,6 +489,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	            case 2:
 	                ShowWindow(hwnd, SW_HIDE);
+					SaveConfigChanges();
 	                ShowTrayIcon(hwnd);
 	                isHiddenToTray = true;
 	                break;
@@ -401,6 +515,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	            case 7:
 	                CheckForUpdates(hwnd, false);
+					SaveConfigChanges();
 	                break;
                 case 8:
 	                if (SendMessage(hLockCheckbox, BM_GETCHECK, 0, 0) == BST_CHECKED) {
@@ -507,6 +622,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         break;
 
     case WM_SETFOCUS:
+		SaveConfigChanges();
         if ((HWND)lParam == hLeftDebounceEdit || (HWND)lParam == hRightDebounceEdit) {
             SendMessage((HWND)lParam, EM_SETSEL, 0, -1);
         }
@@ -523,6 +639,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         break;
 
     case WM_DESTROY:
+		SaveConfigChanges();
         RemoveTrayIcon(hwnd);
         DestroyIcon(hCustomIcon);
         PostQuitMessage(0);
