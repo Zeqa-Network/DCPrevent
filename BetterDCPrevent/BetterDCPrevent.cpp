@@ -107,6 +107,10 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\r'), latestVersionW.end());
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\n'), latestVersionW.end());
 
+	UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
+    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Server version: " + latestVersionW);
+
+
     if (latestVersionW != CURRENT_VERSION) {
         int result = MessageBox(hwnd, (L"Your version is outdated.\nCurrent version: " + CURRENT_VERSION + L".\nLatest version: " + latestVersionW + L"\nDo you want to update?").c_str(),
                                 L"Update Available", MB_YESNO | MB_ICONINFORMATION);
@@ -121,7 +125,6 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
         }
         return false;
     }
-	UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
 }
 
 void CopyLogsToClipboard(HWND hwnd) {
@@ -367,6 +370,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	            case 1:
 	                CopyLogsToClipboard(hwnd);
 	                MessageBox(hwnd, L"Logs copied to clipboard!", L"Info", MB_OK | MB_ICONINFORMATION);
+					UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Logs copied to clipboard");
 	                break;
 
 	            case 2:
@@ -414,7 +418,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                        EnableWindow(hRightResetButton, FALSE);
 	                        EnableWindow(hLinkDebouncesCheckbox, FALSE);
 	                        EnableWindow(hLockCheckbox, FALSE);
-							// log lock
+
                             UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Debounce settings locked");
 	                    }
 	                    else
