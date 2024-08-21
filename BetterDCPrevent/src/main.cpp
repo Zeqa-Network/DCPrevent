@@ -21,7 +21,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "include/wndproc.h"
 #include "resources/Resource.h"
 
-const std::wstring CURRENT_VERSION = L"1.1.1"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.1.2"; // CHANGE THIS WHEN UPDATING
 
 extern HHOOK hMouseHook;
 extern HICON hCustomIcon;
