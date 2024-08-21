@@ -21,7 +21,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "include/wndproc.h"
 #include "resources/Resource.h"
 
-const std::wstring CURRENT_VERSION = L"1.1.0"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.1.1"; // CHANGE THIS WHEN UPDATING
 
 extern HHOOK hMouseHook;
 extern HICON hCustomIcon;
@@ -68,7 +68,12 @@ void UpdateNotificationField(const std::wstring& message) {
     int length = GetWindowTextLength(hNotificationField);
     std::wstring currentText(length, L'\0');
     GetWindowText(hNotificationField, &currentText[0], length + 1);
-    currentText += message + L"\r\n";
+
+	if (length > 0)
+		currentText += L"\r\n";
+    else
+		currentText += L"";
+	currentText += message;
 
     SetWindowText(hNotificationField, currentText.c_str());
     SendMessage(hNotificationField, EM_SETSEL, currentText.length(), currentText.length());
