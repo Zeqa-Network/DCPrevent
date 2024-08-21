@@ -199,7 +199,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
         {
-            HBRUSH hBrush = CreateSolidBrush(RGB(230, 230, 230));
+            HBRUSH hBrush = CreateSolidBrush(RGB(240, 240, 240));
             FillRect(hdc, &ps.rcPaint, hBrush);
             DeleteObject(hBrush);
         }
