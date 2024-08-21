@@ -107,9 +107,10 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\r'), latestVersionW.end());
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\n'), latestVersionW.end());
 
-	UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
-    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Server version: " + latestVersionW);
-
+    if (isStartup) {
+	    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
+		UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Server version: " + latestVersionW);
+    }
 
     if (latestVersionW != CURRENT_VERSION) {
         int result = MessageBox(hwnd, (L"Your version is outdated.\nCurrent version: " + CURRENT_VERSION + L".\nLatest version: " + latestVersionW + L"\nDo you want to update?").c_str(),
