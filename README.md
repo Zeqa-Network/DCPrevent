@@ -1,6 +1,6 @@
 # BetterDCPrevent
 
-### I didn't like that the mainstream DC Prevent shipped with an extra DLL, also it lacked features.
+### I didn't like that the mainstream DC Prevent shipped with an extra DLL, lacked features & wasn't open source.
 
 ## Todo
 - Link left & right debounce
