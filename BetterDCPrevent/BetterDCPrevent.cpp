@@ -1,11 +1,19 @@
 #include <windows.h>
 #include <commctrl.h>
+#include <shellapi.h>
+#include <wininet.h>
 #include <chrono>
 #include <string>
 #include <sstream>
-#include <ctime>
 #include <iomanip>
-#include <shellapi.h>
+#include <algorithm>
+#include <locale>
+#include <codecvt>
+#include "Resource.h"
+
+#pragma comment(lib, "wininet.lib")
+
+const std::wstring CURRENT_VERSION = L"1.0.1"; // CHANGE THIS WHEN UPDATING
 
 HHOOK hMouseHook;
 std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
@@ -14,19 +22,20 @@ int leftDebounceTime = 50;
 int rightDebounceTime = 50;
 
 HWND hLeftTrackbar, hRightTrackbar;
-HWND hLeftDebounceEdit, hRightDebounceEdit, hNotificationField, hCopyLogsButton, hHideToTrayButton, hOpenSourceButton;
+HWND hLeftDebounceEdit, hRightDebounceEdit, hNotificationField, hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hCheckForUpdatesButton;
 NOTIFYICONDATA nid;
 bool isHiddenToTray = false;
+bool linkDebounces = false;
+bool internalUpdate = false;
 
 #define WM_UPDATE_LEFT_DEBOUNCE (WM_USER + 1)
 #define WM_UPDATE_RIGHT_DEBOUNCE (WM_USER + 2)
 #define WM_COPY_LOGS (WM_USER + 3)
 #define WM_HIDE_TO_TRAY (WM_USER + 4)
 #define WM_TRAY_ICON (WM_USER + 5)
+#define WM_LINK_DEBOUNCES (WM_USER + 6)
 
 #define TRAY_ICON_ID 1
-
-bool updatingControls = false;
 
 void UpdateNotificationField(const std::wstring& message) {
     int length = GetWindowTextLength(hNotificationField);
@@ -56,9 +65,66 @@ std::wstring GetCurrentDateTimeString(bool includeDate) {
     return ss.str();
 }
 
+std::wstring ConvertUtf8ToWString(const std::string& utf8Str) {
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), static_cast<int>(utf8Str.length()), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), static_cast<int>(utf8Str.length()), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+
+bool CheckForUpdates(HWND hwnd, bool isStartup) {
+    const std::wstring versionUrl = L"https://raw.githubusercontent.com/jqms/BetterDCPrevent/master/version.txt";
+    const std::wstring latestReleaseUrl = L"https://github.com/jqms/BetterDCPrevent/releases/latest";
+
+    HINTERNET hInternet = InternetOpen(L"Version Checker", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+    if (!hInternet) {
+        MessageBox(hwnd, L"Failed to initialize internet connection.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    HINTERNET hConnect = InternetOpenUrl(hInternet, versionUrl.c_str(), NULL, 0, INTERNET_FLAG_RELOAD, 0);
+    if (!hConnect) {
+        InternetCloseHandle(hInternet);
+        MessageBox(hwnd, L"Failed to open URL for version check.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    std::string latestVersion;
+    char buffer[1024];
+    DWORD bytesRead = 0;
+
+    while (InternetReadFile(hConnect, buffer, sizeof(buffer) - 1, &bytesRead) && bytesRead > 0) {
+        buffer[bytesRead] = '\0';
+        latestVersion.append(buffer);
+    }
+
+    InternetCloseHandle(hConnect);
+    InternetCloseHandle(hInternet);
+
+    std::wstring latestVersionW = ConvertUtf8ToWString(latestVersion);
+
+    latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\r'), latestVersionW.end());
+    latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\n'), latestVersionW.end());
+
+    if (latestVersionW != CURRENT_VERSION) {
+        int result = MessageBox(hwnd, (L"Your version is outdated.\nCurrent version: " + CURRENT_VERSION + L".\nLatest version: " + latestVersionW + L"\nDo you want to update?").c_str(),
+                                L"Update Available", MB_YESNO | MB_ICONINFORMATION);
+        if (result == IDYES) {
+            ShellExecute(hwnd, L"open", latestReleaseUrl.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        }
+        return true;
+    } else {
+        if (!isStartup) {
+            MessageBox(hwnd, (L"You are up to date.\nCurrent version: " + CURRENT_VERSION + L"\nServer version: " + latestVersionW).c_str(),
+                        L"No Update Needed", MB_OK | MB_ICONINFORMATION);
+        }
+        return false;
+    }
+}
+
 void PostDebounceUpdate(HWND hwnd, UINT msg, int debounceTime) {
-    if (!updatingControls) {
-        updatingControls = true;
+    if (!internalUpdate) {
+        internalUpdate = true;
         PostMessage(hwnd, msg, (WPARAM)debounceTime, 0);
     }
 }
@@ -73,7 +139,7 @@ void HandleDebounceUpdate(HWND editControl, int& debounceTime, HWND trackbarCont
     SendMessage(trackbarControl, TBM_SETPOS, TRUE, debounceTime);
 
     InvalidateRect(editControl, NULL, TRUE);
-    updatingControls = false;
+    internalUpdate = false;
 }
 
 void CopyLogsToClipboard(HWND hwnd) {
@@ -102,7 +168,6 @@ void CopyLogsToClipboard(HWND hwnd) {
 }
 
 HICON hCustomIcon;
-#include "Resource.h"
 void ShowTrayIcon(HWND hwnd) {
     nid.cbSize = sizeof(nid);
     nid.hWnd = hwnd;
@@ -126,20 +191,20 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == WM_LBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastLeftClickTime);
             if (duration.count() < leftDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] Suppressed a DC Left Button");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] Suppressed double click (Left Button)");
                 return 1;
             }
             lastLeftClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] MouseDown Left Button");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] Detected left click");
         }
         else if (wParam == WM_RBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRightClickTime);
             if (duration.count() < rightDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] Suppressed a DC Right Button");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] Suppressed double click (Right Button)");
                 return 1;
             }
             lastRightClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] MouseDown Right Button");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] Detected right click");
         }
     }
 
@@ -166,117 +231,169 @@ void UpdateDebounceValuesFromEdit(HWND editControl, int& debounceTime, HWND trac
     SendMessage(trackbarControl, TBM_SETPOS, TRUE, debounceTime);
 }
 
+void ResetDebounceValue(HWND editControl, int& debounceTime, HWND trackbarControl) {
+    debounceTime = 50;
+    SendMessage(trackbarControl, TBM_SETPOS, TRUE, debounceTime);
+    SetWindowText(editControl, std::to_wstring(debounceTime).c_str());
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
-    case WM_CREATE:
-        hCustomIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+case WM_CREATE:
+    hCustomIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
 
-        SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hCustomIcon);
-        SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hCustomIcon);
-        CreateWindow(L"STATIC", L"Left Click Debounce:", WS_VISIBLE | WS_CHILD,
-            10, 10, 150, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hCustomIcon);
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hCustomIcon);
 
-        hLeftTrackbar = CreateWindowEx(
-            0, TRACKBAR_CLASS, NULL,
-            WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS,
-            10, 40, 300, 30,
-            hwnd, NULL, GetModuleHandle(NULL), NULL
-        );
-        SendMessage(hLeftTrackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
-        SendMessage(hLeftTrackbar, TBM_SETPOS, TRUE, leftDebounceTime);
-        SendMessage(hLeftTrackbar, TBM_SETTICFREQ, 10, 0);
+    CreateWindow(L"STATIC", L"Left Click Debounce:", WS_VISIBLE | WS_CHILD,
+        10, 10, 150, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
 
-        hLeftDebounceEdit = CreateWindow(L"EDIT", std::to_wstring(leftDebounceTime).c_str(),
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER,
-            320, 40, 50, 20,
-            hwnd, NULL, GetModuleHandle(NULL), NULL);
+    hLeftTrackbar = CreateWindowEx(
+        0, TRACKBAR_CLASS, NULL,
+        WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS,
+        10, 40, 300, 30,
+        hwnd, NULL, GetModuleHandle(NULL), NULL
+    );
+    SendMessage(hLeftTrackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
+    SendMessage(hLeftTrackbar, TBM_SETPOS, TRUE, leftDebounceTime);
+    SendMessage(hLeftTrackbar, TBM_SETTICFREQ, 10, 0);
 
-        CreateWindow(L"STATIC", L"Right Click Debounce:", WS_VISIBLE | WS_CHILD,
-            10, 80, 150, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
+    hLeftDebounceEdit = CreateWindow(L"EDIT", std::to_wstring(leftDebounceTime).c_str(),
+        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER,
+        320, 45, 50, 20,
+        hwnd, NULL, GetModuleHandle(NULL), NULL);
 
-        hRightTrackbar = CreateWindowEx(
-            0, TRACKBAR_CLASS, NULL,
-            WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS,
-            10, 110, 300, 30,
-            hwnd, NULL, GetModuleHandle(NULL), NULL
-        );
-        SendMessage(hRightTrackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
-        SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, rightDebounceTime);
-        SendMessage(hRightTrackbar, TBM_SETTICFREQ, 10, 0);
+    hLinkDebouncesCheckbox = CreateWindow(L"BUTTON", L"Link",
+        WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
+        320, 80, 60, 20,
+        hwnd, (HMENU)4, GetModuleHandle(NULL), NULL);
 
-        hRightDebounceEdit = CreateWindow(L"EDIT", std::to_wstring(rightDebounceTime).c_str(),
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER,
-            320, 110, 50, 20,
-            hwnd, NULL, GetModuleHandle(NULL), NULL);
+    CreateWindow(L"STATIC", L"Right Click Debounce:", WS_VISIBLE | WS_CHILD,
+        10, 80, 150, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
 
-        hNotificationField = CreateWindow(L"EDIT", L"",
-            WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL,
-            10, 150, 420, 120,
-            hwnd, NULL, GetModuleHandle(NULL), NULL);
-        SendMessage(hNotificationField, EM_SETREADONLY, TRUE, 0);
+    hRightTrackbar = CreateWindowEx(
+        0, TRACKBAR_CLASS, NULL,
+        WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS,
+        10, 110, 300, 30,
+        hwnd, NULL, GetModuleHandle(NULL), NULL
+    );
+    SendMessage(hRightTrackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
+    SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, rightDebounceTime);
+    SendMessage(hRightTrackbar, TBM_SETTICFREQ, 10, 0);
 
-        hCopyLogsButton = CreateWindow(L"BUTTON", L"Copy Logs",
-            WS_VISIBLE | WS_CHILD,
-            10, 275, 80, 30,
-            hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
+    hRightDebounceEdit = CreateWindow(L"EDIT", std::to_wstring(rightDebounceTime).c_str(),
+        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER,
+        320, 115, 50, 20,
+        hwnd, NULL, GetModuleHandle(NULL), NULL);
 
-        hHideToTrayButton = CreateWindow(L"BUTTON", L"Hide to Tray",
-            WS_VISIBLE | WS_CHILD,
-            100, 275, 90, 30,
-            hwnd, (HMENU)2, GetModuleHandle(NULL), NULL);
+    hLeftResetButton = CreateWindow(L"BUTTON", L"Reset",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        380, 40, 60, 30,
+        hwnd, (HMENU)5, GetModuleHandle(NULL), NULL);
 
-        hOpenSourceButton = CreateWindow(L"BUTTON", L"Source Code",
-            WS_VISIBLE | WS_CHILD,
-            200, 275, 100, 30,
-            hwnd, (HMENU)3, GetModuleHandle(NULL), NULL);
+    hRightResetButton = CreateWindow(L"BUTTON", L"Reset",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        380, 110, 60, 30,
+        hwnd, (HMENU)6, GetModuleHandle(NULL), NULL);
 
-        UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] First Opened");
+    hCopyLogsButton = CreateWindow(L"BUTTON", L"Copy Logs",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        10, 275, 80, 30,
+        hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
-        break;
+    hCheckForUpdatesButton = CreateWindow(L"BUTTON", L"Check for Updates",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        100, 275, 130, 30,
+        hwnd, (HMENU)7, GetModuleHandle(NULL), NULL);
+
+    hHideToTrayButton = CreateWindow(L"BUTTON", L"Hide to Tray",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        240, 275, 90, 30,
+        hwnd, (HMENU)2, GetModuleHandle(NULL), NULL);
+
+    hOpenSourceButton = CreateWindow(L"BUTTON", L"Source Code",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        340, 275, 90, 30,
+        hwnd, (HMENU)3, GetModuleHandle(NULL), NULL);
+
+    hNotificationField = CreateWindow(L"EDIT", L"",
+        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL,
+        10, 150, 420, 120,
+        hwnd, NULL, GetModuleHandle(NULL), NULL);
+    SendMessage(hNotificationField, EM_SETREADONLY, TRUE, 0);
+
+    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] First Opened");
+    break;
+
+
+
 
     case WM_HSCROLL:
         if ((HWND)lParam == hLeftTrackbar) {
             leftDebounceTime = static_cast<int>(SendMessage(hLeftTrackbar, TBM_GETPOS, 0, 0));
-            PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, leftDebounceTime);
+            if (!linkDebounces || !internalUpdate) {
+                PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, leftDebounceTime);
+            }
         }
         else if ((HWND)lParam == hRightTrackbar) {
             rightDebounceTime = static_cast<int>(SendMessage(hRightTrackbar, TBM_GETPOS, 0, 0));
+            if (!linkDebounces || !internalUpdate) {
+                PostDebounceUpdate(hwnd, WM_UPDATE_RIGHT_DEBOUNCE, rightDebounceTime);
+            }
+        }
+        break;
+
+case WM_COMMAND:
+    if (HIWORD(wParam) == BN_CLICKED) {
+        if (LOWORD(wParam) == 1) {
+            CopyLogsToClipboard(hwnd);
+            MessageBox(hwnd, L"Logs copied to clipboard!", L"Info", MB_OK | MB_ICONINFORMATION);
+        }
+        else if (LOWORD(wParam) == 7) {
+            CheckForUpdates(hwnd, false);
+        }
+        else if (LOWORD(wParam) == 2) {
+            ShowWindow(hwnd, SW_HIDE);
+            ShowTrayIcon(hwnd);
+            isHiddenToTray = true;
+        }
+        else if (LOWORD(wParam) == 3) {
+            ShellExecute(hwnd, L"open", L"https://github.com/jqms/BetterDCPrevent", NULL, NULL, SW_SHOWNORMAL);
+        }
+        else if (LOWORD(wParam) == 4) {
+            linkDebounces = !linkDebounces;
+            SendMessage(hLinkDebouncesCheckbox, BM_SETCHECK, linkDebounces ? BST_CHECKED : BST_UNCHECKED, 0);
+        }
+        else if (LOWORD(wParam) == 5) {
+            ResetDebounceValue(hLeftDebounceEdit, leftDebounceTime, hLeftTrackbar);
+            PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, leftDebounceTime);
+        }
+        else if (LOWORD(wParam) == 6) {
+            ResetDebounceValue(hRightDebounceEdit, rightDebounceTime, hRightTrackbar);
             PostDebounceUpdate(hwnd, WM_UPDATE_RIGHT_DEBOUNCE, rightDebounceTime);
         }
-        break;
+    }
+    break;
 
-    case WM_COMMAND:
-        if (HIWORD(wParam) == EN_CHANGE) {
-            if ((HWND)lParam == hLeftDebounceEdit) {
-                UpdateDebounceValuesFromEdit(hLeftDebounceEdit, leftDebounceTime, hLeftTrackbar);
-            }
-            else if ((HWND)lParam == hRightDebounceEdit) {
-                UpdateDebounceValuesFromEdit(hRightDebounceEdit, rightDebounceTime, hRightTrackbar);
-            }
-        }
-        else if (HIWORD(wParam) == BN_CLICKED) {
-            if (LOWORD(wParam) == 1) {
-                CopyLogsToClipboard(hwnd);
-                MessageBox(hwnd, L"Logs copied to clipboard!", L"Info", MB_OK | MB_ICONINFORMATION);
-            }
-            else if (LOWORD(wParam) == 2) {
-                ShowWindow(hwnd, SW_HIDE);
-                ShowTrayIcon(hwnd);
-                isHiddenToTray = true;
-            }
-            else if (LOWORD(wParam) == 3) {
-                ShellExecute(hwnd, L"open", L"https://github.com/jqms/BetterDCPrevent", NULL, NULL, SW_SHOWNORMAL);
-            }
-        }
-        break;
 
     case WM_UPDATE_LEFT_DEBOUNCE:
+        internalUpdate = true;
         HandleDebounceUpdate(hLeftDebounceEdit, leftDebounceTime, hLeftTrackbar, wParam);
+        if (linkDebounces) {
+            SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, leftDebounceTime);
+            SetWindowText(hRightDebounceEdit, std::to_wstring(leftDebounceTime).c_str());
+        }
+        internalUpdate = false;
         break;
 
     case WM_UPDATE_RIGHT_DEBOUNCE:
+        internalUpdate = true;
         HandleDebounceUpdate(hRightDebounceEdit, rightDebounceTime, hRightTrackbar, wParam);
+        if (linkDebounces) {
+            SendMessage(hLeftTrackbar, TBM_SETPOS, TRUE, rightDebounceTime);
+            SetWindowText(hLeftDebounceEdit, std::to_wstring(rightDebounceTime).c_str());
+        }
+        internalUpdate = false;
         break;
 
     case WM_SETFOCUS:
@@ -331,10 +448,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     if (!RegisterClass(&wc))
         return -1;
 
-    HWND hwnd = CreateWindow(wc.lpszClassName, L"Double Click Prevent by Jqms",
+    HWND hwnd = CreateWindow(wc.lpszClassName, (L"Double Click Prevent v" + CURRENT_VERSION).c_str(),
         WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         100, 100, 460, 350,
         NULL, NULL, hInstance, NULL);
+
+    CheckForUpdates(hwnd, true);
 
     hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, hInstance, 0);
     if (!hMouseHook) {
