@@ -13,7 +13,7 @@
 
 #pragma comment(lib, "wininet.lib")
 
-const std::wstring CURRENT_VERSION = L"1.0.5"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.0.6"; // CHANGE THIS WHEN UPDATING
 
 HHOOK hMouseHook;
 std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
@@ -121,6 +121,8 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
         }
         return false;
     }
+	// log current version
+	UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
 }
 
 void CopyLogsToClipboard(HWND hwnd) {
@@ -413,6 +415,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                        EnableWindow(hRightResetButton, FALSE);
 	                        EnableWindow(hLinkDebouncesCheckbox, FALSE);
 	                        EnableWindow(hLockCheckbox, FALSE);
+							// log lock
+                            UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Debounce settings locked");
 	                    }
 	                    else
 	                    {
