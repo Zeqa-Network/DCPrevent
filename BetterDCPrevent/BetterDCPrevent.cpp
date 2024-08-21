@@ -13,7 +13,7 @@
 
 #pragma comment(lib, "wininet.lib")
 
-const std::wstring CURRENT_VERSION = L"1.0.2"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.0.3"; // CHANGE THIS WHEN UPDATING
 
 HHOOK hMouseHook;
 std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
@@ -395,8 +395,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	            std::wstringstream ss(text);
 	            ss >> newLeftDebounceTime;
 
-	            if (newLeftDebounceTime < 0) newLeftDebounceTime = 0;
-	            else if (newLeftDebounceTime > 100) newLeftDebounceTime = 100;
+                if (newLeftDebounceTime < 0) {
+                    newLeftDebounceTime = 0;
+					PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, newLeftDebounceTime);
+                }
+                else if (newLeftDebounceTime > 100) {
+                    newLeftDebounceTime = 100;
+					PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, newLeftDebounceTime);
+                }
 
 	            if (leftDebounceTime != newLeftDebounceTime) {
 	                leftDebounceTime = newLeftDebounceTime;
@@ -408,7 +414,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                    internalUpdate = false;
 	                }
 	            }
-				PostDebounceUpdate(hwnd, WM_UPDATE_LEFT_DEBOUNCE, leftDebounceTime);
 	        } else if ((HWND)lParam == hRightDebounceEdit) {
 	            int newRightDebounceTime = 0;
 	            WCHAR text[256];
@@ -416,8 +421,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	            std::wstringstream ss(text);
 	            ss >> newRightDebounceTime;
 
-	            if (newRightDebounceTime < 0) newRightDebounceTime = 0;
-	            else if (newRightDebounceTime > 100) newRightDebounceTime = 100;
+                if (newRightDebounceTime < 0) {
+                    newRightDebounceTime = 0;
+					PostDebounceUpdate(hwnd, WM_UPDATE_RIGHT_DEBOUNCE, newRightDebounceTime);
+                }
+                else if (newRightDebounceTime > 100) {
+                    newRightDebounceTime = 100;
+					PostDebounceUpdate(hwnd, WM_UPDATE_RIGHT_DEBOUNCE, newRightDebounceTime);
+                }
+
 	            if (rightDebounceTime != newRightDebounceTime) {
 	                rightDebounceTime = newRightDebounceTime;
 	                SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, rightDebounceTime);
@@ -428,7 +440,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                    internalUpdate = false;
 	                }
 	            }
-				PostDebounceUpdate(hwnd, WM_UPDATE_RIGHT_DEBOUNCE, rightDebounceTime);
 	        }
 	    }
 	    break;
