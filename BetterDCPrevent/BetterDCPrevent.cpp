@@ -13,7 +13,7 @@
 
 #pragma comment(lib, "wininet.lib")
 
-const std::wstring CURRENT_VERSION = L"1.0.3"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.0.4"; // CHANGE THIS WHEN UPDATING
 
 HHOOK hMouseHook;
 std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
@@ -290,6 +290,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	    SendMessage(hRightTrackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
 	    SendMessage(hRightTrackbar, TBM_SETPOS, TRUE, rightDebounceTime);
 	    SendMessage(hRightTrackbar, TBM_SETTICFREQ, 10, 0);
+
+		CreateWindow(L"STATIC", L"By Jqms", WS_VISIBLE | WS_CHILD, 380, 10, 60, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
 
 	    hRightDebounceEdit = CreateWindow(L"EDIT", std::to_wstring(rightDebounceTime).c_str(),
 	        WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER,
