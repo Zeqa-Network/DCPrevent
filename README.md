@@ -5,7 +5,10 @@
 ## Features
 - Customisable left & right mouse debounce limits
 - Linkable left & right mouse debounce limits
+- Lock the left & right debounce until you restart the app
 - Copyable logs
+- Config that saves across restarts
+- Automatic update checking
 - Logs click time
 - Logs current debounce on click
 - Hide to tray button so it doesn't clog your taskbar
