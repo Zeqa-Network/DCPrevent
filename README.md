@@ -1,6 +1,6 @@
 # BetterDCPrevent
 
-BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the extra DLL, adds new features, and is fully open source.
+BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the need for an extra DLL, adds new features, and is fully open source.
 
 ## ✨ Features
 
