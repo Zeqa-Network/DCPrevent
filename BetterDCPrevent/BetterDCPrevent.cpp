@@ -126,20 +126,20 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == WM_LBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastLeftClickTime);
             if (duration.count() < leftDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L" ms] Suppressed a DC Left Button");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] Suppressed a DC Left Button");
                 return 1;
             }
             lastLeftClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L" ms] MouseDown Left Button");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(leftDebounceTime) + L"ms] MouseDown Left Button");
         }
         else if (wParam == WM_RBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRightClickTime);
             if (duration.count() < rightDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L" ms] Suppressed a DC Right Button");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] Suppressed a DC Right Button");
                 return 1;
             }
             lastRightClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L" ms] MouseDown Right Button");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(rightDebounceTime) + L"ms] MouseDown Right Button");
         }
     }
 
