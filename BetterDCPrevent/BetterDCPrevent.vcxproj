@@ -131,19 +131,26 @@
   <ItemGroup>
     <ClInclude Include="BetterDCPrevent.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Resource.h" />
+    <ClInclude Include="src\resources\Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BetterDCPrevent.cpp" />
+    <ClCompile Include="src\include\config.h" />
+    <ClCompile Include="src\include\hooks.h" />
+    <ClCompile Include="src\include\main.h" />
+    <ClCompile Include="src\include\utils.h" />
+    <ClCompile Include="src\include\wndproc.h" />
+    <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\hooks.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="src\wndproc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BetterDCPrevent.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\DCPrevent.ico" />
-    <Image Include="BetterDCPrevent.ico" />
-    <Image Include="small.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

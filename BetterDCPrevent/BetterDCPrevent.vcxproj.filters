@@ -21,7 +21,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="src\resources\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BetterDCPrevent.h">
@@ -29,7 +29,34 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BetterDCPrevent.cpp">
+    <ClCompile Include="src\include\config.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\include\hooks.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\include\main.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\include\utils.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\include\wndproc.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wndproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,12 +66,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="BetterDCPrevent.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\..\..\..\Downloads\DCPrevent.ico">
       <Filter>Resource Files</Filter>
     </Image>
