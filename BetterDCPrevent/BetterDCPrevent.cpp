@@ -121,8 +121,6 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
         }
         return false;
     }
-	// log current version
-	UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
 }
 
 void CopyLogsToClipboard(HWND hwnd) {
