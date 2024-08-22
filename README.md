@@ -1,4 +1,3 @@
-Certainly! Here's the updated text with credits included:
 
 ---
 
@@ -44,5 +43,3 @@ This project is licensed under the [MIT License](LICENSE).
 - **Icon designed by:** [miniguy7](https://github.com/miniguy7)
 
 --- 
-
-Let me know if you need any more changes!
