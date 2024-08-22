@@ -6,7 +6,6 @@
 BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the need for an extra DLL, adds new features, and is fully open source.
 
 ## ✨ Features
-
 - **Customizable Mouse Debounce:** Set individual debounce limits for left and right mouse buttons.
 - **Link Debounce Limits:** Option to link the left and right debounce limits for synchronized settings.
 - **Lock Debounce Settings:** Lock your debounce settings until the app is restarted, perfect for scrims.
@@ -34,11 +33,9 @@ To build BetterDCPrevent from source:
 > **Note:** You may encounter issues with the icon. The icon file is located in the root directory. If it's essential, you'll need to troubleshoot this on your own.
 
 ## 📜 License
-
 This project is licensed under the [MIT License](LICENSE).
 
 ## 🙌 Credits
-
 - **Created by:** [jqms](https://github.com/jqms)
 - **Icon designed by:** [miniguy7](https://github.com/miniguy7)
 
