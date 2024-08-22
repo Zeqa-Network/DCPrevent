@@ -15,73 +15,10 @@ extern bool isHiddenToTray;
 extern Config config;
 bool isMovingOrResizing = false;
 
-//typedef struct _WINCOMPATTRDATA {
-//    DWORD attribute;
-//    PVOID pData;
-//    ULONG dataSize;
-//} WINCOMPATTRDATA;
-//
-//typedef struct _ACRYLIC {
-//    BOOL enable;
-//    DWORD color;
-//    DWORD opacity;
-//} ACRYLIC;
-//
-//enum ACCENT_STATE {
-//    ACCENT_DISABLED = 0,
-//    ACCENT_ENABLE_GRADIENT = 1,
-//    ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-//    ACCENT_ENABLE_BLURBEHIND = 3,
-//    ACCENT_ENABLE_ACRYLICBLURBEHIND = 4,
-//    ACCENT_ENABLE_HOSTBACKDROP = 5,
-//    ACCENT_ENABLE_ACRYLIC = 6
-//};
-//
-//typedef struct _ACCENT_POLICY {
-//    ACCENT_STATE accentState;
-//    DWORD accentFlags;
-//    DWORD gradientColor;
-//    DWORD animationId;
-//} ACCENT_POLICY;
-//
-//typedef struct _WINCOMPATTR {
-//    DWORD attribute;
-//    PVOID pData;
-//    ULONG dataSize;
-//} WINCOMPATTR;
-//
-//typedef BOOL(WINAPI* pSetWindowCompositionAttribute)(HWND, WINCOMPATTR*);
-//
-//void EnableAcrylic(HWND hwnd) {
-//    HMODULE hUser = LoadLibrary(L"user32.dll");
-//    if (hUser) {
-//        pSetWindowCompositionAttribute SetWindowCompositionAttribute = 
-//            (pSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
-//
-//        if (SetWindowCompositionAttribute) {
-//            ACCENT_POLICY policy = { ACCENT_ENABLE_ACRYLICBLURBEHIND, 2, 0x99000000, 0 };
-//            WINCOMPATTR data = { 19, &policy, sizeof(policy) };
-//            SetWindowCompositionAttribute(hwnd, &data);
-//        }
-//        FreeLibrary(hUser);
-//    }
-//}
-//
-//void EnableAcrylicInThread(HWND hwnd) {
-//	// make a thread, check if the window is moving before trying acrylic
-//	std::thread([hwnd]() {
-//		while (isMovingOrResizing) {
-//			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//		}
-//		EnableAcrylic(hwnd);
-//		}).detach();
-//}
-
 HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
 HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms;
 extern HICON hCustomIcon;
 extern void SetControlFont(HWND hwnd, int height, bool bold);
-HWND globalHWND;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
@@ -434,41 +371,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				DestroyMenu(hMenu);
 			}
         break;
-
-    default:
-        return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-    return 0;
-}
-
-LRESULT CALLBACK WndProcOverlay(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    switch (msg) {
-	case WM_CREATE:
-
-	    break;
-    case WM_PAINT: {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-
-		HWND hwndBelow = globalHWND;
-
-		if (hwndBelow) {
-			HDC hdcMem = CreateCompatibleDC(hdc);
-			HBITMAP hbmMem = CreateCompatibleBitmap(hdc, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top);
-            HGDIOBJ hOld = SelectObject(hdcMem, hbmMem);
-
-			PrintWindow(hwndBelow, hdcMem, PW_CLIENTONLY);
-
-			BitBlt(hdc, 0, 0, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top, hdcMem, 0, 0, SRCCOPY);
-
-			SelectObject(hdcMem, hOld);
-            DeleteObject(hbmMem);
-            DeleteDC(hdcMem);
-		}
-
-        EndPaint(hwnd, &ps);
-		}
-		break;
 
     default:
         return DefWindowProc(hwnd, msg, wParam, lParam);

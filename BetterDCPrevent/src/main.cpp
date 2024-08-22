@@ -212,8 +212,6 @@ void SafeUpdate(HWND editControl, HWND trackbarControl, int& debounceTime, bool 
     }
 }
 
-extern HWND globalHWND;
-
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
     WNDCLASS wc = { 0 };
     hCustomIcon = (HICON)LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
@@ -231,27 +229,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_VISIBLE),
         100, 100, 460, 350,
         NULL, NULL, hInstance, NULL);
-
-    globalHWND = hwnd;
-
-    //
-    //WNDCLASS wcOverlay = { 0 };
-    //wcOverlay.lpfnWndProc = WndProcOverlay;
-    //wcOverlay.hInstance = hInstance;
-    //wcOverlay.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-    //wcOverlay.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    //wcOverlay.lpszClassName = L"myWindowClassOverlay";
-    //wcOverlay.style = CS_HREDRAW | CS_VREDRAW;
-    //
-	//if (!RegisterClass(&wcOverlay))
-    //    return -1;
-    //
-    //HWND hwndOverlay = CreateWindow(wcOverlay.lpszClassName, L"",
-    //    WS_POPUP | WS_VISIBLE,
-    //    100, 100, 460, 350,
-    //    NULL, NULL, hInstance, NULL);
-
-    //ShowWindow(hwndOverlay, SW_SHOW);
 
 	LoadConfigChanges();
     if (isHiddenToTray) {
