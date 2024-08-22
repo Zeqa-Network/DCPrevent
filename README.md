@@ -5,6 +5,14 @@
 
 BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the need for an extra DLL, adds new features, and is fully open source.
 
+## 📩 To-do
+- **Dark Mode:** Make the UI be darkly themed so it's easier on the eyes.
+  - **Implementation:**
+    - ❌ ~~Figure out windows color API.~~
+    - Invert colors shader.
+    - Try again at windows color API.
+    - Change titlebar color.
+     
 ## ✨ Features
 - **Customizable Mouse Debounce:** Set individual debounce limits for left and right mouse buttons.
 - **Link Debounce Limits:** Option to link the left and right debounce limits for synchronized settings.
