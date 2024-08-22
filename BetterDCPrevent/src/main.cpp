@@ -1,25 +1,10 @@
+#include "pch.h"
 #include "include/main.h"
-#include <windows.h>
-#include <shellapi.h>
-#include <string>
-#include <sstream>
-#include <chrono>
-#include <algorithm>
-#include <commctrl.h>
-#include <wininet.h>
-#include <dwmapi.h>
-#include <thread>
-#pragma comment(lib, "wininet.lib")
-
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
-name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "include/config.h"
 #include "include/hooks.h"
 #include "include/utils.h"
 #include "include/wndproc.h"
-#include "resources/Resource.h"
 
 const std::wstring CURRENT_VERSION = L"1.1.2"; // CHANGE THIS WHEN UPDATING
 
@@ -227,6 +212,8 @@ void SafeUpdate(HWND editControl, HWND trackbarControl, int& debounceTime, bool 
     }
 }
 
+extern HWND globalHWND;
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
     WNDCLASS wc = { 0 };
     hCustomIcon = (HICON)LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
@@ -241,9 +228,30 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         return -1;
 
     HWND hwnd = CreateWindow(wc.lpszClassName, (L"Jqms's Double Click Prevent v" + CURRENT_VERSION).c_str(),
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_VISIBLE),
         100, 100, 460, 350,
         NULL, NULL, hInstance, NULL);
+
+    globalHWND = hwnd;
+
+    //
+    //WNDCLASS wcOverlay = { 0 };
+    //wcOverlay.lpfnWndProc = WndProcOverlay;
+    //wcOverlay.hInstance = hInstance;
+    //wcOverlay.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
+    //wcOverlay.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    //wcOverlay.lpszClassName = L"myWindowClassOverlay";
+    //wcOverlay.style = CS_HREDRAW | CS_VREDRAW;
+    //
+	//if (!RegisterClass(&wcOverlay))
+    //    return -1;
+    //
+    //HWND hwndOverlay = CreateWindow(wcOverlay.lpszClassName, L"",
+    //    WS_POPUP | WS_VISIBLE,
+    //    100, 100, 460, 350,
+    //    NULL, NULL, hInstance, NULL);
+
+    //ShowWindow(hwndOverlay, SW_SHOW);
 
 	LoadConfigChanges();
     if (isHiddenToTray) {

@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "include/hooks.h"
-#include <windows.h>
-#include <chrono>
 
 #include "include/config.h"
 #include "include/main.h"

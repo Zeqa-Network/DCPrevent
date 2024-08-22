@@ -1,11 +1,10 @@
+#include "pch.h"
+
 #include "include/wndproc.h"
-#include <thread>
 #include "include/main.h"
-#include <windows.h>
-#include <dwmapi.h>
 #include "include/config.h"
 #include "include/utils.h"
-#include "resources/Resource.h"
+
 
 extern int leftDebounceTime;
 extern int rightDebounceTime;
@@ -82,6 +81,7 @@ HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNoti
 HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms;
 extern HICON hCustomIcon;
 extern void SetControlFont(HWND hwnd, int height, bool bold);
+HWND globalHWND;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
@@ -434,6 +434,41 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				DestroyMenu(hMenu);
 			}
         break;
+
+    default:
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+    return 0;
+}
+
+LRESULT CALLBACK WndProcOverlay(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+	case WM_CREATE:
+
+	    break;
+    case WM_PAINT: {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hwnd, &ps);
+
+		HWND hwndBelow = globalHWND;
+
+		if (hwndBelow) {
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmMem = CreateCompatibleBitmap(hdc, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top);
+            HGDIOBJ hOld = SelectObject(hdcMem, hbmMem);
+
+			PrintWindow(hwndBelow, hdcMem, PW_CLIENTONLY);
+
+			BitBlt(hdc, 0, 0, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top, hdcMem, 0, 0, SRCCOPY);
+
+			SelectObject(hdcMem, hOld);
+            DeleteObject(hbmMem);
+            DeleteDC(hdcMem);
+		}
+
+        EndPaint(hwnd, &ps);
+		}
+		break;
 
     default:
         return DefWindowProc(hwnd, msg, wParam, lParam);

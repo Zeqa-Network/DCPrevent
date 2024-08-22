@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "include/utils.h"
 #include "include/config.h"
 #include "include/main.h"

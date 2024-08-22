@@ -1,8 +1,5 @@
 #pragma once
-#include <windows.h>
-#include <commctrl.h>
-#include <string>
-#include <windows.h>
+#include "../pch.h"
 
 #define WM_UPDATE_LEFT_DEBOUNCE (WM_USER + 1)
 #define WM_UPDATE_RIGHT_DEBOUNCE (WM_USER + 2)

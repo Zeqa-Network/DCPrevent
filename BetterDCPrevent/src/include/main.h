@@ -1,7 +1,5 @@
 #pragma once
-#include <string>
-#include <windows.h>
-
+#include "../pch.h"
 
 void UpdateUIFromConfig();
 void SaveConfigChanges();
