@@ -4,9 +4,6 @@
 # BetterDCPrevent
 
 BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the need for an extra DLL, adds new features, and is fully open source.
-
-## 📩 To-do
-- **Revamp UI:** Use `C++/WinRT` and redo the UI to support light/dark themes, and look more like a native windows application. 
      
 ## ✨ Features
 - **Customizable Mouse Debounce:** Set individual debounce limits for left and right mouse buttons.
