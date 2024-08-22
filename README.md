@@ -1,3 +1,5 @@
+Certainly! Here's the updated text with credits included:
+
 ---
 
 # BetterDCPrevent
@@ -36,4 +38,11 @@ To build BetterDCPrevent from source:
 
 This project is licensed under the [MIT License](LICENSE).
 
----
+## 🙌 Credits
+
+- **Created by:** [jqms](https://github.com/jqms)
+- **Icon designed by:** [miniguy7](https://github.com/miniguy7)
+
+--- 
+
+Let me know if you need any more changes!
