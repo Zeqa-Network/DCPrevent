@@ -12,3 +12,12 @@
 void UpdateDebounceValuesFromEdit(HWND editControl, int& debounceTime, HWND trackbarControl);
 void HandleDebounceUpdate(HWND editControl, int& debounceTime, HWND trackbarControl, WPARAM wParam);
 void PostDebounceUpdate(HWND hwnd, UINT msg, int debounceTime);
+
+class Utils {
+public:
+    static DWORD getPID(const char* procName);
+    static bool isMinecraftOpen();
+    static bool isMinecraftOpen_Slow(int delay);
+    static HWND getMinecraftWindow();
+    static bool isMinecraftFocused();
+};

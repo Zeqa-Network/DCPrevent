@@ -12,11 +12,12 @@ extern bool internalUpdate;
 extern bool linkDebounces;
 extern bool lockDebounces;
 extern bool isHiddenToTray;
+extern bool onlyApplyToMinecraftWindow;
 extern Config config;
 bool isMovingOrResizing = false;
 
 HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
-HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms;
+HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms, hOnlyWhenMCFocused;
 extern HICON hCustomIcon;
 extern void SetControlFont(HWND hwnd, int height, bool bold);
 
@@ -53,6 +54,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	        310, 80, 60, 20,
 	        hwnd, (HMENU)4, GetModuleHandle(NULL), NULL);
 		SetControlFont(hLinkDebouncesCheckbox, 17, false);
+
+
+		hOnlyWhenMCFocused = CreateWindow(L"BUTTON", L"Minecraft Only",
+			WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,
+			// top right corner
+			310, 10, 120, 20,
+			hwnd, (HMENU)9, GetModuleHandle(NULL), NULL);
+		SetControlFont(hOnlyWhenMCFocused, 17, false);
 
 
 		hLockCheckbox = CreateWindow(L"BUTTON", L"Lock",
@@ -237,6 +246,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                    }
 	                }
 					break;
+				case 9:
+					onlyApplyToMinecraftWindow = !onlyApplyToMinecraftWindow;
+					SendMessage(hOnlyWhenMCFocused, BM_SETCHECK, onlyApplyToMinecraftWindow ? BST_CHECKED : BST_UNCHECKED, 0);
+
+					break;
+
 				case 10001:
 					if (isHiddenToTray) {
 						ShowWindow(hwnd, SW_RESTORE);

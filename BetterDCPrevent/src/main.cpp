@@ -12,11 +12,12 @@ extern HHOOK hMouseHook;
 extern HICON hCustomIcon;
 NOTIFYICONDATA nid;
 extern HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
-extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton;
+extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hOnlyWhenMCFocused;
 extern bool isHiddenToTray;
 extern bool linkDebounces;
 extern bool internalUpdate;
 extern bool lockDebounces;
+extern bool onlyApplyToMinecraftWindow;
 extern Config config;
 
 extern std::chrono::steady_clock::time_point lastLeftClickTime;
@@ -32,6 +33,7 @@ void UpdateUIFromConfig() {
     SetWindowText(hLeftDebounceEdit, std::to_wstring(config.GetLeftDebounceTime()).c_str());
     SetWindowText(hRightDebounceEdit, std::to_wstring(config.GetRightDebounceTime()).c_str());
     SendMessage(hLinkDebouncesCheckbox, BM_SETCHECK, config.IsLinkDebounces() ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendMessage(hOnlyWhenMCFocused, BM_SETCHECK, config.GetOnlyApplyToMinecraftWindow() ? BST_CHECKED : BST_UNCHECKED, 0);
 	isHiddenToTray = config.IsHiddenToTray();
 }
 
@@ -40,6 +42,7 @@ void LoadConfigChanges() {
 	rightDebounceTime = config.GetRightDebounceTime();
 	linkDebounces = config.IsLinkDebounces();
 	isHiddenToTray = config.IsHiddenToTray();
+	onlyApplyToMinecraftWindow = config.GetOnlyApplyToMinecraftWindow();
 }
 
 void SaveConfigChanges() {
@@ -47,6 +50,7 @@ void SaveConfigChanges() {
     config.SetRightDebounceTime(rightDebounceTime);
     config.SetLinkDebounces(linkDebounces);
     config.SetHiddenToTray(isHiddenToTray);
+	config.SetOnlyApplyToMinecraftWindow(onlyApplyToMinecraftWindow);
 }
 
 void UpdateNotificationField(const std::wstring& message) {

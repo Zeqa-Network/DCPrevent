@@ -3,6 +3,7 @@
 
 #include "include/config.h"
 #include "include/main.h"
+#include "include/utils.h"
 
 HHOOK hMouseHook;
 Config config;
@@ -10,14 +11,17 @@ int leftDebounceTime = config.leftDebounceTime;
 int rightDebounceTime = config.rightDebounceTime;
 bool linkDebounces = config.linkDebounces;
 bool isHiddenToTray = config.isHiddenToTray;
+bool onlyApplyToMinecraftWindow = config.onlyApplyToMinecraftWindow;
 std::chrono::steady_clock::time_point lastLeftClickTime;
 std::chrono::steady_clock::time_point lastRightClickTime;
 bool lockDebounces;
 
 LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
+        if (onlyApplyToMinecraftWindow && !Utils::isMinecraftFocused()) {
+            return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
+        }
         auto currentTime = std::chrono::steady_clock::now();
-
         if (wParam == WM_LBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastLeftClickTime);
             if (duration.count() < leftDebounceTime) {

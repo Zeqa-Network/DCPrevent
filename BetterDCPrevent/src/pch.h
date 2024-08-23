@@ -12,5 +12,7 @@
 #include <wininet.h>
 #include <filesystem>
 #include <fstream>
+#include <Psapi.h>
+#include <shellapi.h>
 
 #include "resources/Resource.h"
