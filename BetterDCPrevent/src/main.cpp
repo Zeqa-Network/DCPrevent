@@ -218,7 +218,7 @@ void SafeUpdate(HWND editControl, HWND trackbarControl, int& debounceTime, bool 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
     WNDCLASS wc = { 0 };
-    hCustomIcon = (HICON)LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    hCustomIcon = (HICON)LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);

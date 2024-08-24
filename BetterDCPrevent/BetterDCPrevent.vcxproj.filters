@@ -45,6 +45,9 @@
     <ClInclude Include="src\include\wndproc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\hooks.cpp">
@@ -70,6 +73,18 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\DCPrevent.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\ZeqaICO.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\resources\icons\DCPrevent.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\PHxPQSI\favicon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\resources\icons\ZeqaLogo.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

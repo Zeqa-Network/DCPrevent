@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="BetterDCPrevent.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\resources\Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -169,6 +170,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\DCPrevent.ico" />
+    <Image Include="..\..\..\..\Downloads\PHxPQSI\favicon.ico" />
+    <Image Include="..\..\..\..\Downloads\ZeqaICO.ico" />
+    <Image Include="src\resources\icons\DCPrevent.ico" />
+    <Image Include="src\resources\icons\ZeqaLogo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
