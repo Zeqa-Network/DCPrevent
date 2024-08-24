@@ -191,7 +191,7 @@ void ShowTrayIcon(HWND hwnd) {
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     nid.uCallbackMessage = WM_TRAY_ICON;
     nid.hIcon = hCustomIcon;
-    wcscpy_s(nid.szTip, L"Double Click Prevent");
+    wcscpy_s(nid.szTip, L"Zeqa Double Click Prevent");
 
     Shell_NotifyIcon(NIM_ADD, &nid);
 }
@@ -229,7 +229,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     if (!RegisterClass(&wc))
         return -1;
 
-    HWND hwnd = CreateWindow(wc.lpszClassName, (L"Zeqa Double Click Prevent v" + CURRENT_VERSION).c_str(),
+    HWND hwnd = CreateWindow(wc.lpszClassName, (L"Zeqa Double Click Prevent (v" + CURRENT_VERSION + L")").c_str(),
         (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_VISIBLE),
         100, 100, 460, 350,
         NULL, NULL, hInstance, NULL);
