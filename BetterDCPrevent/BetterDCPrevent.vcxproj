@@ -173,6 +173,7 @@
     <Image Include="..\..\..\..\Downloads\PHxPQSI\favicon.ico" />
     <Image Include="..\..\..\..\Downloads\ZeqaICO.ico" />
     <Image Include="src\resources\icons\DCPrevent.ico" />
+    <Image Include="src\resources\icons\DCPrevent1.ico" />
     <Image Include="src\resources\icons\ZeqaLogo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
