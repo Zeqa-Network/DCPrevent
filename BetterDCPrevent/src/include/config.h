@@ -81,7 +81,7 @@ public:
     std::filesystem::path GetConfigPath() const {
         wchar_t appdataPath[MAX_PATH];
         if (GetEnvironmentVariableW(L"APPDATA", appdataPath, MAX_PATH)) {
-            return std::filesystem::path(appdataPath) / L"BetterDCPrevent";
+            return std::filesystem::path(appdataPath) / L"BetterDCPrevent/Zeqa";
         } else {
             return L"";
         }
