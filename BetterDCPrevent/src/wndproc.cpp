@@ -16,8 +16,8 @@ extern bool onlyApplyToMinecraftWindow;
 extern Config config;
 bool isMovingOrResizing = false;
 
-HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
-HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms, hOnlyWhenMCFocused;
+extern HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
+extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms, hOnlyWhenMCFocused;
 extern HICON hCustomIcon;
 extern void SetControlFont(HWND hwnd, int height, bool bold);
 
