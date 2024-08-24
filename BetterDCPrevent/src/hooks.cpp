@@ -31,7 +31,7 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         }
         if (is50FromFocused) {
             if (!hasSentMessage) {
-	            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] [" + std::to_wstring(newRightDebounceTime) + L"ms] Minecraft focused, forcing 50ms");
+	            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Minecraft focused, forcing 50ms");
 	            hasSentMessage = true;
 	        }
 			EnableWindow(hLeftTrackbar, FALSE);
