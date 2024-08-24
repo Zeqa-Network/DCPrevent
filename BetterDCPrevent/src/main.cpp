@@ -229,7 +229,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     if (!RegisterClass(&wc))
         return -1;
 
-    HWND hwnd = CreateWindow(wc.lpszClassName, (L"Jqms's Double Click Prevent v" + CURRENT_VERSION).c_str(),
+    HWND hwnd = CreateWindow(wc.lpszClassName, (L"Zeqa Double Click Prevent v" + CURRENT_VERSION).c_str(),
         (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_VISIBLE),
         100, 100, 460, 350,
         NULL, NULL, hInstance, NULL);
