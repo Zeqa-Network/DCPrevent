@@ -104,21 +104,32 @@ std::wstring ConvertUtf8ToWString(const std::string& utf8Str) {
     return wstrTo;
 }
 
-bool CheckForUpdates(HWND hwnd, bool isStartup) {
+struct UpdateParams {
+    HWND hwnd;
+    bool isStartup;
+};
+
+DWORD WINAPI CheckForUpdatesThread(LPVOID lpParam) {
+    UpdateParams* params = (UpdateParams*)lpParam;
+    HWND hwnd = params->hwnd;
+    bool isStartup = params->isStartup;
+
     const std::wstring versionUrl = L"https://raw.githubusercontent.com/jqms/BetterDCPrevent/master/version.txt";
     const std::wstring latestReleaseUrl = L"https://github.com/jqms/BetterDCPrevent/releases/latest";
 
     HINTERNET hInternet = InternetOpen(L"Version Checker", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
     if (!hInternet) {
         MessageBox(hwnd, L"Failed to initialize internet connection.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
+        delete params;
+        return 0;
     }
 
     HINTERNET hConnect = InternetOpenUrl(hInternet, versionUrl.c_str(), NULL, 0, INTERNET_FLAG_RELOAD, 0);
     if (!hConnect) {
         InternetCloseHandle(hInternet);
         MessageBox(hwnd, L"Failed to open URL for version check.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
+        delete params;
+        return 0;
     }
 
     std::string latestVersion;
@@ -134,13 +145,12 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
     InternetCloseHandle(hInternet);
 
     std::wstring latestVersionW = ConvertUtf8ToWString(latestVersion);
-
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\r'), latestVersionW.end());
     latestVersionW.erase(std::remove(latestVersionW.begin(), latestVersionW.end(), L'\n'), latestVersionW.end());
 
     if (isStartup) {
-	    UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
-		UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Server version: " + latestVersionW);
+        UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Current version: " + CURRENT_VERSION);
+        UpdateNotificationField(L"[" + GetCurrentDateTimeString(true) + L"] Server version: " + latestVersionW);
     }
 
     if (latestVersionW != CURRENT_VERSION) {
@@ -149,12 +159,36 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
         if (result == IDYES) {
             ShellExecute(hwnd, L"open", latestReleaseUrl.c_str(), NULL, NULL, SW_SHOWNORMAL);
         }
-        return true;
     } else {
         if (!isStartup) {
             MessageBox(hwnd, (L"You are up to date.\nCurrent version: " + CURRENT_VERSION + L"\nServer version: " + latestVersionW).c_str(),
                         L"No Update Needed", MB_OK | MB_ICONINFORMATION);
         }
+    }
+
+    delete params;
+    return 1;
+}
+
+bool CheckForUpdates(HWND hwnd, bool isStartup) {
+    UpdateParams* params = new UpdateParams;
+    params->hwnd = hwnd;
+    params->isStartup = isStartup;
+
+    HANDLE hThread = CreateThread(
+        NULL,                   
+        0,                      
+        CheckForUpdatesThread,  
+        params,                 
+        0,                      
+        NULL);        
+
+    if (hThread) {
+        CloseHandle(hThread);
+        return true;
+    } else {
+        MessageBox(hwnd, L"Failed to create update check thread.", L"Error", MB_OK | MB_ICONERROR);
+        delete params;
         return false;
     }
 }
