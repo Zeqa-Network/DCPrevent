@@ -24,6 +24,7 @@
     <ProjectGuid>{8dcc5601-cead-41a7-94e3-ff997de775e9}</ProjectGuid>
     <RootNamespace>BetterDCPrevent</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ZeqaDCPrevent</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
