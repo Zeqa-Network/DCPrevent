@@ -37,6 +37,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 🙌 Credits
 - **Created by:** [jqms](https://github.com/jqms)
- - I, Jqms, hereby give Zeqa Network full rights to use this code as they please, I made this Zeqa-themed version of it anyway so don't make any false claims.
+  - I, Jqms, hereby give Zeqa Network full rights to use this code as they please, I made this Zeqa-themed version of it anyway so don't make any false claims.
 
 --- 
