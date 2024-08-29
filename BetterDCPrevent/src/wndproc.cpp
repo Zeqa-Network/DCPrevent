@@ -192,7 +192,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                break;
 
 				case 3:
-	                ShellExecute(hwnd, L"open", L"https://github.com/jqms/BetterDCPrevent", NULL, NULL, SW_SHOWNORMAL);
+	                ShellExecute(hwnd, L"open", L"https://github.com/Zeqa-Network/DCPrevent", NULL, NULL, SW_SHOWNORMAL);
 	                break;
 
 	            case 4:
