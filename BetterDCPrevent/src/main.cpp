@@ -6,7 +6,7 @@
 #include "include/utils.h"
 #include "include/wndproc.h"
 
-const std::wstring CURRENT_VERSION = L"1.1.5"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.1.6"; // CHANGE THIS WHEN UPDATING
 
 extern HHOOK hMouseHook;
 extern HICON hCustomIcon;
