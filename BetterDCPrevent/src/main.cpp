@@ -115,7 +115,7 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID lpParam) {
     bool isStartup = params->isStartup;
 
     const std::wstring versionUrl = L"https://raw.githubusercontent.com/Zeqa-Network/DCPrevent/master/version.txt";
-    const std::wstring latestReleaseUrl = L"https://github.com/jqms/BetterDCPrevent/releases/latest";
+    const std::wstring latestReleaseUrl = L"https://github.com/Zeqa-Network/DCPrevent/releases/latest";
 
     HINTERNET hInternet = InternetOpen(L"Version Checker", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
     if (!hInternet) {
