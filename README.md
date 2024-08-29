@@ -1,9 +1,9 @@
 
 ---
 
-# BetterDCPrevent
+# ZeqaDCPrevent
 
-BetterDCPrevent is an improved alternative to the mainstream DC Prevent. It removes the need for an extra DLL, adds new features, and is fully open source.
+ZeqaDCPrevent is an alternative, open source version of DCPrevent, owned and maintained by Zeqa Network.
      
 ## ✨ Features
 - **Customizable Mouse Debounce:** Set individual debounce limits for left and right mouse buttons.
@@ -24,7 +24,7 @@ To build BetterDCPrevent from source:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/jqms/BetterDCPrevent.git
+   git clone https://github.com/Zeqa-Network/DCPrevent.git
    ```
 
 2. **Build the Project:**
@@ -37,6 +37,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 🙌 Credits
 - **Created by:** [jqms](https://github.com/jqms)
-- **Icon designed by:** [miniguy7](https://github.com/miniguy7)
+ - I, Jqms, hereby give Zeqa Network full rights to use this code as they please, I made this Zeqa-themed version of it anyway so don't make any false claims.
 
 --- 
