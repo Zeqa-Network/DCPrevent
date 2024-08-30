@@ -11,7 +11,6 @@
 #define IDC_BETTERDCPREVENT             109
 #define IDR_MAINFRAME                   128
 #define IDI_ICON1                       129
-#define IDI_ICON2                       130
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

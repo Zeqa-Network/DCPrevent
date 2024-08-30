@@ -72,22 +72,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\DCPrevent.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\..\Downloads\ZeqaICO.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="src\resources\icons\DCPrevent.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\..\Downloads\PHxPQSI\favicon.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="src\resources\icons\ZeqaLogo.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="src\resources\icons\DCPrevent1.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

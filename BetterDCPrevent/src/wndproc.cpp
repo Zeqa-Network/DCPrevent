@@ -24,7 +24,7 @@ extern void SetControlFont(HWND hwnd, int height, bool bold);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
 	case WM_CREATE:
-	    hCustomIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2));
+	    hCustomIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
 
 	    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hCustomIcon);
 	    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hCustomIcon);
