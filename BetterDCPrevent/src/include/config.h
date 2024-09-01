@@ -35,7 +35,7 @@ public:
     void CreateConfigDirectory() {
         std::filesystem::path configPath = GetConfigPath();
         if (!std::filesystem::exists(configPath)) {
-            std::filesystem::create_directory(configPath);
+            std::filesystem::create_directories(configPath);
         }
     }
 
