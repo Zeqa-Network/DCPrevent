@@ -32,11 +32,11 @@ To build BetterDCPrevent from source:
 
 > **Note:** You may encounter issues with the icon. The icon file is located in the root directory. If it's essential, you'll need to troubleshoot this on your own.
 
-## 📜 License
-This project is licensed under the [MIT License](LICENSE).
-
 ## 🙌 Credits
 - **Created by:** [jqms](https://github.com/jqms)
   - I, Jqms, hereby give Zeqa Network full rights to use this code as they please, I made this Zeqa-themed version of it anyway so don't make any false claims.
+
+## 📜 License
+This project is licensed under the [MIT License](LICENSE).
 
 --- 
