@@ -21,6 +21,78 @@ extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetBut
 extern HICON hCustomIcon;
 extern void SetControlFont(HWND hwnd, int height, bool bold);
 
+LRESULT CALLBACK AboutDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
+	case WM_PAINT: {
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+		{
+			HBRUSH hBrush = CreateSolidBrush(RGB(240, 240, 240));
+			FillRect(hdc, &ps.rcPaint, hBrush);
+			DeleteObject(hBrush);
+		}
+		EndPaint(hwnd, &ps);
+	}
+	break;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == 1) {
+			ShellExecute(NULL, L"open", L"https://github.com/Zeqa-Network/DCPrevent", NULL, NULL, SW_SHOWNORMAL);
+		}
+		else if (LOWORD(wParam) == 2) {
+			ShellExecute(NULL, L"open", L"https://discord.gg/zeqa", NULL, NULL, SW_SHOWNORMAL);
+		}
+		return 0;
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		return 0;
+	case WM_DESTROY:
+		return 0;
+	default:
+		return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+}
+
+void ShowAboutDialog(HWND hwnd) {
+	WNDCLASS wc = { 0 };
+	wc.lpfnWndProc = AboutDialogProc;
+	wc.hInstance = GetModuleHandle(NULL);
+	wc.lpszClassName = L"AboutDialogClass";
+
+	RegisterClass(&wc);
+
+	HWND hDlg = CreateWindowEx(WS_EX_DLGMODALFRAME, L"AboutDialogClass", L"About Zeqa Double Click Prevent",
+		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+		CW_USEDEFAULT, CW_USEDEFAULT, 400, 160, hwnd, NULL, GetModuleHandle(NULL), NULL);
+
+	HICON hCustomIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+
+	SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hCustomIcon);
+	SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)hCustomIcon);
+
+	if (hDlg) {
+		HWND hStaticAboutTitle = CreateWindow(L"STATIC", L"About", WS_VISIBLE | WS_CHILD,
+			10, 10, 50, 20, hDlg, NULL, GetModuleHandle(NULL), NULL);
+		SetControlFont(hStaticAboutTitle, 20, true);
+
+		HWND hStaticAboutBodyText = CreateWindow(L"STATIC", L"ZeqaDCPrevent is an alternative, open source version of DCPrevent, owned and maintained by Zeqa Network.",
+			WS_VISIBLE | WS_CHILD | SS_LEFT | WS_CLIPCHILDREN,
+			10, 40, 380, 60, hDlg, NULL, GetModuleHandle(NULL), NULL);
+		SetControlFont(hStaticAboutBodyText, 17, false);
+
+		HWND hButtonOpenUrl = CreateWindow(L"BUTTON", L"Open GitHub Repository", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+			10, 80, 180, 30, hDlg, (HMENU)1, GetModuleHandle(NULL), NULL);
+		SetControlFont(hButtonOpenUrl, 17, false);
+
+		HWND hButtonOpenDiscord = CreateWindow(L"BUTTON", L"Zeqa Discord", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+			195, 80, 180, 30, hDlg, (HMENU)2, GetModuleHandle(NULL), NULL);
+		SetControlFont(hButtonOpenDiscord, 17, false);
+
+		ShowWindow(hDlg, SW_SHOW);
+		UpdateWindow(hDlg);
+	}
+}
+
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
 	case WM_CREATE:
@@ -125,7 +197,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	        hwnd, (HMENU)2, GetModuleHandle(NULL), NULL);
 		SetControlFont(hHideToTrayButton, 17, false);
 
-	    hOpenSourceButton = CreateWindow(L"BUTTON", L"Source Code",
+	    hOpenSourceButton = CreateWindow(L"BUTTON", L"About",
 	        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
 	        340, 275, 90, 30,
 	        hwnd, (HMENU)3, GetModuleHandle(NULL), NULL);
@@ -192,7 +264,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	                break;
 
 				case 3:
-	                ShellExecute(hwnd, L"open", L"https://github.com/Zeqa-Network/DCPrevent", NULL, NULL, SW_SHOWNORMAL);
+					ShowAboutDialog(hwnd);
 	                break;
 
 	            case 4:
@@ -365,7 +437,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         break;
 
     case WM_TRAY_ICON:
-        if (LOWORD(lParam) == WM_LBUTTONDBLCLK) {
+        if (LOWORD(lParam) == WM_LBUTTONUP) {
             if (isHiddenToTray) {
                 ShowWindow(hwnd, SW_RESTORE);
                 SetForegroundWindow(hwnd);
