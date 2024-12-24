@@ -20,6 +20,9 @@ HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hR
 
 LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
+        if (wParam != WM_LBUTTONDOWN && wParam != WM_RBUTTONDOWN && wParam != WM_LBUTTONUP   && wParam != WM_RBUTTONUP) {
+            return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
+        }
         bool is50FromFocused = false;
         static bool hasSentMessage = false;
 		int newLeftDebounceTime = leftDebounceTime;
