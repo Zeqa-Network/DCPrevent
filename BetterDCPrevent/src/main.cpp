@@ -6,13 +6,13 @@
 #include "include/utils.h"
 #include "include/wndproc.h"
 
-const std::wstring CURRENT_VERSION = L"1.1.7"; // CHANGE THIS WHEN UPDATING
+const std::wstring CURRENT_VERSION = L"1.1.8"; // CHANGE THIS WHEN UPDATING
 
 extern HHOOK hMouseHook;
 extern HICON hCustomIcon;
 NOTIFYICONDATA nid;
 extern HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
-extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hOnlyWhenMCFocused;
+extern HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLogsButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hOnlyWhenMCFocused;
 extern bool isHiddenToTray;
 extern bool linkDebounces;
 extern bool internalUpdate;
@@ -190,31 +190,6 @@ bool CheckForUpdates(HWND hwnd, bool isStartup) {
         MessageBox(hwnd, L"Failed to create update check thread.", L"Error", MB_OK | MB_ICONERROR);
         delete params;
         return false;
-    }
-}
-
-void CopyLogsToClipboard(HWND hwnd) {
-    int length = GetWindowTextLength(hNotificationField);
-    if (length == 0) return;
-
-    std::wstring logText(length, L'\0');
-    GetWindowText(hNotificationField, &logText[0], length + 1);
-
-    if (OpenClipboard(hwnd)) {
-        EmptyClipboard();
-
-        HGLOBAL hClipboardData = GlobalAlloc(GMEM_DDESHARE, (logText.length() + 1) * sizeof(wchar_t));
-        if (hClipboardData) {
-            wchar_t* pchData = (wchar_t*)GlobalLock(hClipboardData);
-            if (pchData) {
-                wcscpy_s(pchData, logText.length() + 1, logText.c_str());
-                GlobalUnlock(hClipboardData);
-
-                SetClipboardData(CF_UNICODETEXT, hClipboardData);
-            }
-        }
-
-        CloseClipboard();
     }
 }
 

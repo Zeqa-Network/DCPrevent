@@ -12,6 +12,8 @@
 void UpdateDebounceValuesFromEdit(HWND editControl, int& debounceTime, HWND trackbarControl);
 void HandleDebounceUpdate(HWND editControl, int& debounceTime, HWND trackbarControl, WPARAM wParam);
 void PostDebounceUpdate(HWND hwnd, UINT msg, int debounceTime);
+void CopyLogsToClipboard(HWND hwnd);
+void SaveLogsToFile(HWND hwnd);
 
 class Utils {
 public:

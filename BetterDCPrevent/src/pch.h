@@ -16,3 +16,4 @@
 #include <shellapi.h>
 
 #include "resources/Resource.h"
+#pragma comment(lib, "Comctl32.lib")

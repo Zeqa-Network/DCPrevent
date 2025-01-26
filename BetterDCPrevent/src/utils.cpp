@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "include/utils.h"
+
+#include <regex>
+
 #include "include/config.h"
 #include "include/main.h"
 
@@ -71,6 +74,56 @@ DWORD Utils::getPID(const char* procName) {
     }
     delete[] PidList;
     return 0;
+}
+
+extern HWND hNotificationField;
+
+void CopyLogsToClipboard(HWND hwnd) {
+    int length = GetWindowTextLength(hNotificationField);
+    if (length == 0) return;
+
+    std::wstring logText(length, L'\0');
+    GetWindowText(hNotificationField, &logText[0], length + 1);
+
+    if (OpenClipboard(hwnd)) {
+        EmptyClipboard();
+
+        HGLOBAL hClipboardData = GlobalAlloc(GMEM_DDESHARE, (logText.length() + 1) * sizeof(wchar_t));
+        if (hClipboardData) {
+            wchar_t* pchData = (wchar_t*)GlobalLock(hClipboardData);
+            if (pchData) {
+                wcscpy_s(pchData, logText.length() + 1, logText.c_str());
+                GlobalUnlock(hClipboardData);
+
+                SetClipboardData(CF_UNICODETEXT, hClipboardData);
+            }
+        }
+
+        CloseClipboard();
+    }
+}
+
+void SaveLogsToFile(HWND hwnd) {
+    Config config;
+    std::filesystem::path logPath = config.GetConfigPath() / L"logs";
+    if (!std::filesystem::exists(logPath)) {
+        std::filesystem::create_directories(logPath);
+    }
+
+    std::wstring filename = logPath / (L"logs" + std::to_wstring(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + L".txt");
+    std::wofstream file(filename);
+    if (file.is_open()) {
+        int length = GetWindowTextLength(hNotificationField);
+        if (length == 0) return;
+        std::wstring logText(length, L'\0');
+        GetWindowText(hNotificationField, &logText[0], length + 1);
+
+        std::wregex newLineRegex(L"(\r\n|\r|\n)+"); // i got lazy dont judge me :)
+        logText = std::regex_replace(logText, newLineRegex, L"\n");
+
+        file << logText;
+        file.close();
+    }
 }
 
 bool Utils::isMinecraftOpen() {

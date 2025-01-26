@@ -12,44 +12,43 @@ int rightDebounceTime = config.rightDebounceTime;
 bool linkDebounces = config.linkDebounces;
 bool isHiddenToTray = config.isHiddenToTray;
 bool onlyApplyToMinecraftWindow = config.onlyApplyToMinecraftWindow;
-std::chrono::steady_clock::time_point lastLeftClickTime;
-std::chrono::steady_clock::time_point lastRightClickTime;
+std::chrono::steady_clock::time_point lastLeftClickTime = std::chrono::steady_clock::now();
+std::chrono::steady_clock::time_point lastRightClickTime = std::chrono::steady_clock::now();
 bool lockDebounces;
 HWND hLeftTrackbar, hRightTrackbar, hLeftDebounceEdit, hRightDebounceEdit, hNotificationField;
-HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms, hOnlyWhenMCFocused;
-
+HWND hCopyLogsButton, hHideToTrayButton, hOpenSourceButton, hLeftResetButton, hRightResetButton, hLogsButton, hLinkDebouncesCheckbox, hLockCheckbox, hCheckForUpdatesButton, hStaticLeftClickDebounce, hStaticRightClickDebounce, hStaticByJqms, hOnlyWhenMCFocused;
 LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
-        if (wParam != WM_LBUTTONDOWN && wParam != WM_RBUTTONDOWN && wParam != WM_LBUTTONUP   && wParam != WM_RBUTTONUP) {
+        if (wParam != WM_LBUTTONDOWN && wParam != WM_RBUTTONDOWN && wParam != WM_LBUTTONUP && wParam != WM_RBUTTONUP) {
             return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
         }
         bool is50FromFocused = false;
         static bool hasSentMessage = false;
-		int newLeftDebounceTime = leftDebounceTime;
+        int newLeftDebounceTime = leftDebounceTime;
         int newRightDebounceTime = rightDebounceTime;
         if (Utils::isMinecraftFocused()) {
             newLeftDebounceTime = 50;
-			newRightDebounceTime = 50;
-			is50FromFocused = true;
+            newRightDebounceTime = 50;
+            is50FromFocused = true;
         }
         if (is50FromFocused) {
             if (!hasSentMessage) {
-	            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Minecraft focused, forcing 50ms");
-	            hasSentMessage = true;
-	        }
-			EnableWindow(hLeftTrackbar, FALSE);
-			EnableWindow(hRightTrackbar, FALSE);
-			EnableWindow(hLeftDebounceEdit, FALSE);
-			EnableWindow(hRightDebounceEdit, FALSE);
-			EnableWindow(hLeftResetButton, FALSE);
-			EnableWindow(hRightResetButton, FALSE);
-			EnableWindow(hLinkDebouncesCheckbox, FALSE);
-			EnableWindow(hLockCheckbox, FALSE);
-		}
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Minecraft focused, forcing 50ms");
+                hasSentMessage = true;
+            }
+            EnableWindow(hLeftTrackbar, FALSE);
+            EnableWindow(hRightTrackbar, FALSE);
+            EnableWindow(hLeftDebounceEdit, FALSE);
+            EnableWindow(hRightDebounceEdit, FALSE);
+            EnableWindow(hLeftResetButton, FALSE);
+            EnableWindow(hRightResetButton, FALSE);
+            EnableWindow(hLinkDebouncesCheckbox, FALSE);
+            EnableWindow(hLockCheckbox, FALSE);
+        }
         else {
             if (!lockDebounces) {
                 if (hasSentMessage) {
-					hasSentMessage = false; 
+                    hasSentMessage = false;
                 }
 
                 EnableWindow(hLeftTrackbar, TRUE);
@@ -65,24 +64,24 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (onlyApplyToMinecraftWindow && !Utils::isMinecraftFocused()) {
             return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
         }
-    	auto currentTime = std::chrono::steady_clock::now();
+        auto currentTime = std::chrono::steady_clock::now();
         if (wParam == WM_LBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastLeftClickTime);
             if (duration.count() < newLeftDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Suppressed double click (Left Button)");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Suppressed left click (+" + std::to_wstring(duration.count()) + L"ms)");
                 return 1;
             }
             lastLeftClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Detected left click");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newLeftDebounceTime) + L"ms] Detected left click (+" + std::to_wstring(duration.count()) + L"ms)");
         }
         else if (wParam == WM_RBUTTONDOWN) {
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRightClickTime);
             if (duration.count() < newRightDebounceTime) {
-                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newRightDebounceTime) + L"ms] Suppressed double click (Right Button)");
+                UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newRightDebounceTime) + L"ms] Suppressed right click (+" + std::to_wstring(duration.count()) + L"ms)");
                 return 1;
             }
             lastRightClickTime = currentTime;
-            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newRightDebounceTime) + L"ms] Detected right click");
+            UpdateNotificationField(L"[" + GetCurrentDateTimeString(false) + L"] [" + std::to_wstring(newRightDebounceTime) + L"ms] Detected right click (+" + std::to_wstring(duration.count()) + L"ms)");
         }
     }
 
